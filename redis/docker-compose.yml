@@ -1,0 +1,13 @@
+services:
+  redis: 
+    image: redis
+    command: redis-server --requirepass passwordredis --save "" --appendonly no
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - redis-net
+
+networks:
+  redis-net:

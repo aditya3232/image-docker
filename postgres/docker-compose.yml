@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - dbnet
+
+volumes:
+  pgdata:
+
+networks:
+  dbnet:

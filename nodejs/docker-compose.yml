@@ -1,0 +1,12 @@
+services:
+  node-app:
+    image: node:lts
+    container_name: nodejs-lts-app
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm start"
+    environment:
+      - NODE_ENV=development
