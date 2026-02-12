@@ -1,7 +1,10 @@
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build: .
     container_name: jenkins
+    user: root
+    group_add:
+      - "${DOCKER_GID}"
     ports:
       - "8080:8080"
       - "50000:50000"
