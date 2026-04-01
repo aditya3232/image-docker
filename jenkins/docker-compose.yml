@@ -1,3 +1,4 @@
+name: jenkins-ci
 services:
   jenkins:
     build: .
