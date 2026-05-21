@@ -1,0 +1,48 @@
+services:
+  opensearch:
+    image: opensearchproject/opensearch:latest
+    container_name: opensearch
+
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=OpenSearch#2026Dev
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+
+    networks:
+      - observability
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+
+    ports:
+      - "5601:5601"
+
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "true"
+
+    depends_on:
+      - opensearch
+
+    networks:
+      - observability
+
+volumes:
+  opensearch-data:
+
+networks:
+  observability:
