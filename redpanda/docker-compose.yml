@@ -1,0 +1,44 @@
+services:
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: redpanda
+
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=512M
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
+
+    ports:
+      - "9092:9092"
+      - "19092:19092"
+
+    networks:
+      - redpanda_network
+
+  console:
+    image: docker.redpanda.com/redpandadata/console:latest
+    container_name: redpanda-console
+
+    depends_on:
+      - redpanda
+
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+
+    ports:
+      - "9002:8080"
+
+    networks:
+      - redpanda_network
+
+networks:
+  redpanda_network:
