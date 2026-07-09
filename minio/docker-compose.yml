@@ -17,6 +17,13 @@ volumes:
 
 # set alias dulu
 # docker exec -it minio mc alias set local http://localhost:9000 minioadmin minioadmin
-#
+
 # set bukcet public
 # docker exec -it minio mc anonymous set download local/field-srv-bucket
+
+# cek bucket
+# docker exec -it minio mc ls local
+
+# hapus bucket
+# docker exec -it minio mc rb --force local/field-srv-bucket
+
