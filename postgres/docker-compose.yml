@@ -1,16 +1,52 @@
 services:
   postgres:
-    image: postgres:latest
-    container_name: postgres_db
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root_password
-      POSTGRES_DB: appdb
-    volumes:
-      - pgdata:/var/lib/postgresql
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
     ports:
-      - "5432:5432"
-    # restart: unless-stopped
+      - "${HOST_POSTGRES_PORT:-5432}:${CONT_POSTGRES_PORT:-5432}"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-appdb}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-appdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - postgres-net
 
 volumes:
   pgdata:
+    name: pgdata
+
+networks:
+  postgres-net:
+    name: postgres-net
+    driver: bridge
+
+# ==========================================
+# Cheat Sheet & Perintah Berguna:
+# ==========================================
+# 1. Jalankan container di background:
+#    docker compose up -d
+#
+# 2. Hentikan container:
+#    docker compose down
+#
+# 3. Masuk ke interactive psql di dalam container:
+#    docker exec -it postgres psql -U postgres -d appdb
+#
+# 4. Backup database (Dump):
+#    docker exec -t postgres pg_dump -U postgres appdb > backup.sql
+#
+# 5. Restore database:
+#    cat backup.sql | docker exec -i postgres psql -U postgres -d appdb
+#
+# 6. Cek status koneksi:
+#    docker exec -it postgres pg_isready -U postgres -d appdb
+# ==========================================
