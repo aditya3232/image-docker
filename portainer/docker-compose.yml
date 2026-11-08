@@ -4,8 +4,8 @@ services:
     container_name: portainer
     restart: unless-stopped
     ports:
-      - "9003:9003" # UI Portainer
-      - "9443:9443" # HTTPS (optional)
+      - "${HOST_PORTAINER_HTTP_PORT:-9003}:9000"   # HTTP UI (Host 9003 -> Container 9000)
+      - "${HOST_PORTAINER_HTTPS_PORT:-9443}:9443" # HTTPS UI
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_database:/data
@@ -13,3 +13,21 @@ services:
 volumes:
   portainer_database:
     name: portainer_database
+
+# ==========================================
+# Cheat Sheet & Perintah Berguna:
+# ==========================================
+# 1. Jalankan container:
+#    docker compose up -d
+#
+# 2. Hentikan container:
+#    docker compose down
+#
+# 3. Akses Web UI:
+#    - HTTP:  http://localhost:9003
+#    - HTTPS: https://localhost:9443
+#
+# Catatan: Buat akun admin dalam 5 menit setelah container pertama kali dijalankan.
+# Jika lewat 5 menit dan container mati, restart dengan:
+#    docker compose restart portainer
+# ==========================================
