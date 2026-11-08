@@ -8,7 +8,7 @@ Setup Docker Compose untuk PostgreSQL Database Server.
 2. **Pinned Version**: Menggunakan `postgres:16-alpine` (ringan ~140 MB vs ~450 MB versi standar) dan mencegah resiko *breaking change* versi baru yang sering terjadi jika menggunakan tag `:latest`.
 3. **Environment Fleksibel**: Kredensial dan port dikonfigurasi melalui file `.env`.
 4. **Health Check**: Dilengkapi pengecekan berkala kesiapan database dengan `pg_isready`.
-5. **Restart Policy**: `restart: unless-stopped` agar otomatis berjalan saat reboot.
+5. **Manual On-Demand**: Restart policy dinonaktifkan secara default agar hemat RAM/CPU di mesin lokal dan hanya berjalan saat Anda menyalakannya secara manual.
 
 ---
 
