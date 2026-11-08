@@ -2,7 +2,7 @@ services:
   redpanda:
     image: redpandadata/redpanda:latest
     container_name: redpanda
-
+    # restart: unless-stopped # Dinonaktifkan agar manual start (hemat resource)
     command:
       - redpanda
       - start
@@ -12,33 +12,75 @@ services:
       - --reserve-memory=0M
       - --node-id=0
       - --check=false
-
       - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
-
-      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:19092
-
+      - --advertise-kafka-addr=internal://redpanda:9092,external://localhost:${HOST_REDPANDA_KAFKA_PORT:-19092}
+      - --pandaproxy-addr=0.0.0.0:8082
+      - --advertise-pandaproxy-addr=localhost:8082
+      - --schema-registry-addr=0.0.0.0:8081
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
     ports:
-      - "9092:9092"
-      - "19092:19092"
-
+      - "${HOST_REDPANDA_KAFKA_PORT:-19092}:19092"
+      - "${HOST_REDPANDA_ADMIN_PORT:-9644}:9644"
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.*true' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     networks:
       - redpanda_network
 
   console:
-    image: docker.redpanda.com/redpandadata/console:latest
+    image: redpandadata/console:latest
     container_name: redpanda-console
-
+    # restart: unless-stopped # Dinonaktifkan agar manual start (hemat resource)
     depends_on:
-      - redpanda
-
+      redpanda:
+        condition: service_healthy
     environment:
       KAFKA_BROKERS: redpanda:9092
-
+      REDPANDA_ADMINAPI_ENABLED: "true"
+      REDPANDA_ADMINAPI_URLS: "http://redpanda:9644"
     ports:
-      - "9002:8080"
-
+      - "${HOST_REDPANDA_CONSOLE_PORT:-9002}:8080"
     networks:
       - redpanda_network
 
+volumes:
+  redpanda_data:
+    name: redpanda_data
+
 networks:
   redpanda_network:
+    name: redpanda_network
+    driver: bridge
+
+# ==========================================
+# Cheat Sheet & Perintah Berguna:
+# ==========================================
+# 1. Jalankan container di background:
+#    docker compose up -d
+#
+# 2. Hentikan container:
+#    docker compose down
+#
+# 3. Cek kesehatan cluster via rpk CLI:
+#    docker exec -it redpanda rpk cluster health
+#    docker exec -it redpanda rpk cluster info
+#
+# 4. Buat topic baru:
+#    docker exec -it redpanda rpk topic create my-topic
+#
+# 5. List seluruh topic:
+#    docker exec -it redpanda rpk topic list
+#
+# 6. Kirim pesan (Produce):
+#    docker exec -it redpanda rpk topic produce my-topic
+#
+# 7. Baca pesan (Consume):
+#    docker exec -it redpanda rpk topic consume my-topic
+#
+# 8. Web Console Dashboard:
+#    Buka browser di http://localhost:9002
+# ==========================================
