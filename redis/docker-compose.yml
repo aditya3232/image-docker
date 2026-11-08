@@ -2,7 +2,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: redis
-    restart: unless-stopped
+    # restart: unless-stopped
     ports:
       - "${HOST_REDIS_PORT:-6379}:${CONT_REDIS_PORT:-6379}"
     command: >
