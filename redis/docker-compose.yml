@@ -1,21 +1,57 @@
 services:
   redis:
-    image: redis:7.2
-    container_name: redis-cache
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
     ports:
-      - "${HOST_REDIS_PORT}:${CONT_REDIS_PORT}"
+      - "${HOST_REDIS_PORT:-6379}:${CONT_REDIS_PORT:-6379}"
     command: >
       redis-server
-      --requirepass ${REDIS_PASSWORD}
-      --save ""
-      --appendonly no
+      --requirepass ${REDIS_PASSWORD:-password}
+      --appendonly yes
       --maxclients 10000
       --timeout 0
       --tcp-keepalive 60
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
     networks:
       - redis-net
+
+volumes:
+  redis_data:
+    name: redis_data
 
 networks:
   redis-net:
     name: redis-net
     driver: bridge
+
+# ==========================================
+# Cheat Sheet & Perintah Berguna:
+# ==========================================
+# 1. Jalankan container di background:
+#    docker compose up -d
+#
+# 2. Hentikan container:
+#    docker compose down
+#
+# 3. Masuk ke Redis CLI di dalam container:
+#    docker exec -it redis redis-cli -a password
+#
+# 4. Test ping:
+#    docker exec -it redis redis-cli -a password ping
+#
+# 5. Monitor aktivitas real-time:
+#    docker exec -it redis redis-cli -a password monitor
+#
+# 6. Koneksi dari Redis Insight di Host:
+#    - Host: 127.0.0.1 (atau localhost)
+#    - Port: 6379 (sesuai HOST_REDIS_PORT di .env)
+#    - Password: password (sesuai REDIS_PASSWORD di .env)
+# ==========================================
